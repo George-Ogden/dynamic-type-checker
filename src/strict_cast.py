@@ -3,9 +3,17 @@ from typing import Any, overload
 
 @overload
 def strict_cast[T](typ: type[T], obj: object, /) -> T: ...
+
+
 @overload
 def strict_cast(typ: Any, obj: object, /) -> Any: ...
+
+
 def strict_cast(typ: Any, obj: object, /) -> Any:
+    """
+    Raises a TypeError if obj is not of type T.
+    Otherwise, return obj.
+    """
     if check_type(typ, obj):
         return obj
     raise generate_type_error(typ, obj)
