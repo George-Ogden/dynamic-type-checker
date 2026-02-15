@@ -12,9 +12,11 @@ TODO
 *.patch
 nohup*
 
+### JetBrains ###
+.idea/*
+
 ### VisualStudioCode ###
 .vscode/*
-
 # Local History for Visual Studio Code
 .history
 .ionide
