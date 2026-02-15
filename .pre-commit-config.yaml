@@ -23,6 +23,27 @@ repos:
       - id: trailing-whitespace
       - id: requirements-txt-fixer
 
+  - repo: local
+    hooks:
+      - id: check-absolute-imports
+        name: Check for absolute imports
+        language: system
+        entry: |
+          bash -c '
+          LOG=$(mktemp)
+          EXITCODE=0
+          for file in "$@"; do
+            if grep -nE "from +src\." "$file" >"$LOG"; then
+              while IFS= read -r line; do
+                printf "Absolute import found in %s:%s\n" "$file" "$line"
+                EXITCODE=1
+              done <"$LOG"
+            fi
+          done
+          exit $EXITCODE
+          ' --
+        files: ^src/
+
   - repo: https://github.com/George-Ogden/linter/
     rev: v2.0.0
     hooks:
