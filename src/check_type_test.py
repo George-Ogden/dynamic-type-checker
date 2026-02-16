@@ -1,8 +1,36 @@
+import sys
 from typing import Any
 
+from debug import pprint
 import pytest
 
 from .check_type import check_type
+
+
+class EmptyClass: ...
+
+
+class OneFieldClass:
+    def __init__(self, x: Any) -> None:
+        self.x = x
+
+
+class MetaclassIsInstance(type):
+    def __instancecheck__(cls, instance: object) -> bool:
+        return cls.is_instance(instance)
+
+    @classmethod
+    def is_instance(cls, x: object) -> bool:
+        return issubclass(type(x), cls)
+
+
+class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
+    @classmethod
+    def is_instance(cls, x: object) -> bool:
+        return isinstance(x, int) and x > 0
+
+
+class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 
 
 @pytest.mark.parametrize(
@@ -29,7 +57,32 @@ from .check_type import check_type
         (tuple, ((),), True),
         (tuple, (3), False),
         (tuple, [2], False),
+        (EmptyClass, EmptyClass(), True),
+        (EmptyClass, EmptyClass, False),
+        (EmptyClass, 5, False),
+        (EmptyClass, OneFieldClass("no"), False),
+        (OneFieldClass, OneFieldClass("no"), True),
+        (OneFieldClass, OneFieldClass(10), True),
+        (OneFieldClass, OneFieldClass, False),
+        (OneFieldClass, None, False),
+        pytest.param(
+            CustomMetaclassIsInstance,
+            CustomMetaclassIsInstance(),
+            False,
+            marks=pytest.mark.xfail,  # see https://github.com/python/cpython/issues/144873
+        ),
+        (CustomMetaclassIsInstance, CustomMetaclassSubclassIsInstance(), False),
+        (CustomMetaclassSubclassIsInstance, 2, True),
+        (CustomMetaclassIsInstance, 5, True),
+        (CustomMetaclassIsInstance, 1, True),
+        (CustomMetaclassIsInstance, 0, False),
+        (CustomMetaclassIsInstance, -5, False),
+        (CustomMetaclassIsInstance, 1.0, False),
+        (CustomMetaclassIsInstance, True, True),
+        (CustomMetaclassIsInstance, False, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
+    pprint(typ, prefix="typ = ", file=sys.stderr)
+    pprint(obj, prefix="obj = ", file=sys.stderr)
     assert check_type(typ, obj) == succeeds
