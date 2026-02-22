@@ -10,7 +10,7 @@ from .check_type import check_type
 class EmptyClass: ...
 
 
-class OneFieldClass:
+class OneFieldClass:  # noqa: B903
     def __init__(self, x: Any) -> None:
         self.x = x
 
