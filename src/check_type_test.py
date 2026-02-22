@@ -36,6 +36,7 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 @pytest.mark.parametrize(
     "typ, obj, succeeds",
     [
+        # primitive types
         (bool, True, True),
         (bool, 5, False),
         (int, 6, True),
@@ -57,6 +58,7 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (tuple, ((),), True),
         (tuple, (3), False),
         (tuple, [2], False),
+        # classes
         (EmptyClass, EmptyClass(), True),
         (EmptyClass, EmptyClass, False),
         (EmptyClass, 5, False),
@@ -65,6 +67,7 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (OneFieldClass, OneFieldClass(10), True),
         (OneFieldClass, OneFieldClass, False),
         (OneFieldClass, None, False),
+        # custom metaclasses
         pytest.param(
             CustomMetaclassIsInstance,
             CustomMetaclassIsInstance(),
