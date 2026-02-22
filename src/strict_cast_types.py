@@ -2,7 +2,8 @@
 
 from collections.abc import Sequence
 import types
-from typing import assert_type, cast
+import typing
+from typing import Any, assert_type, cast
 
 from . import strict_cast
 
@@ -21,3 +22,6 @@ assert_type(strict_cast(CustomClass, ()), CustomClass)
 assert_type(strict_cast(None, 0), None)
 assert_type(strict_cast(None, None), None)
 assert_type(strict_cast(types.NoneType, ()), None)
+
+# Unclear why this fails. See https://github.com/python/mypy/issues/20859.
+assert_type(strict_cast(typing.Any, "abc"), Any)  # type: ignore [assert-type]
