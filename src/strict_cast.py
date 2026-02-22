@@ -8,6 +8,10 @@ def strict_cast[T](typ: type[T], obj: object, /) -> T: ...
 
 
 @overload
+def strict_cast(typ: None, obj: object, /) -> None: ...
+
+
+@overload
 def strict_cast(typ: Any, obj: object, /) -> Any: ...
 
 
