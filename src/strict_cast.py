@@ -1,5 +1,7 @@
 from typing import Any, overload
 
+from .check_type import check_type
+
 
 @overload
 def strict_cast[T](typ: type[T], obj: object, /) -> T: ...
@@ -21,7 +23,3 @@ def strict_cast(typ: Any, obj: object, /) -> Any:
 
 def generate_type_error(typ: Any, obj: object, /) -> TypeError:
     return TypeError(f"{obj!r} is not an instance of {typ.__name__!r}.")
-
-
-def check_type[T](typ: type[T], obj: object, /) -> bool:
-    return isinstance(obj, typ)

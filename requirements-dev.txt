@@ -7,4 +7,3 @@ mypy
 prek
 pytest
 pytest-timeout
-pytest-xdist
