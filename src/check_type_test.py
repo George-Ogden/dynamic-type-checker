@@ -93,6 +93,11 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (None, (), False),
         (types.NoneType, None, True),
         (types.NoneType, 3.1, False),
+        # Any type hint
+        (Any, 1, True),
+        (Any, None, True),
+        (Any, OneFieldClass(1), True),
+        (Any, OneFieldClass, True),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
