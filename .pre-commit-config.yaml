@@ -1,5 +1,5 @@
 default_stages: [pre-commit]
-default_install_hook_types: [pre-commit, commit-msg]
+default_install_hook_types: [pre-commit, prepare-commit-msg, commit-msg]
 
 ci:
   skip:
@@ -57,7 +57,7 @@ repos:
         args: [--severity=warning]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit/
-    rev: v0.15.1
+    rev: v0.15.2
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -74,8 +74,13 @@ repos:
     hooks:
       - id: actionlint
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+
   - repo: https://github.com/George-Ogden/pre-commit-hooks/
-    rev: v2.2.0
+    rev: v2.3.0
     hooks:
       - id: check-merge-conflict
       - id: dbg-check
@@ -87,3 +92,4 @@ repos:
       - id: mypy
         args: [-r, requirements-dev.txt, --show-traceback]
       - id: spell-check-commit-msgs
+      - id: version-txt-auto-msg

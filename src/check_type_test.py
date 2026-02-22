@@ -1,4 +1,5 @@
 import sys
+import types
 from typing import Any
 
 from debug import pprint
@@ -10,7 +11,7 @@ from .check_type import check_type
 class EmptyClass: ...
 
 
-class OneFieldClass:
+class OneFieldClass:  # noqa: B903
     def __init__(self, x: Any) -> None:
         self.x = x
 
@@ -36,12 +37,15 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 @pytest.mark.parametrize(
     "typ, obj, succeeds",
     [
+        # primitive types
         (bool, True, True),
         (bool, 5, False),
+        (bool, None, False),
         (int, 6, True),
         (int, True, True),
         (int, 7.4, False),
         (int, "hello", False),
+        (int, None, False),
         (str, "hello", True),
         (str, 7, False),
         (str, 7.4, False),
@@ -57,6 +61,8 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (tuple, ((),), True),
         (tuple, (3), False),
         (tuple, [2], False),
+        (tuple, None, False),
+        # classes
         (EmptyClass, EmptyClass(), True),
         (EmptyClass, EmptyClass, False),
         (EmptyClass, 5, False),
@@ -65,6 +71,7 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (OneFieldClass, OneFieldClass(10), True),
         (OneFieldClass, OneFieldClass, False),
         (OneFieldClass, None, False),
+        # custom metaclasses
         pytest.param(
             CustomMetaclassIsInstance,
             CustomMetaclassIsInstance(),
@@ -80,6 +87,12 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (CustomMetaclassIsInstance, 1.0, False),
         (CustomMetaclassIsInstance, True, True),
         (CustomMetaclassIsInstance, False, False),
+        # None type hint
+        (None, None, True),
+        (None, 1, False),
+        (None, (), False),
+        (types.NoneType, None, True),
+        (types.NoneType, 3.1, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
