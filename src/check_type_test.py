@@ -99,6 +99,11 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (typing.Any, None, True),
         (typing.Any, OneFieldClass(1), True),
         (typing.Any, OneFieldClass, True),
+        # Never/NoReturn type hint
+        (typing.Never, 1, False),
+        (typing.Never, object, False),
+        (typing.NoReturn, 1, False),
+        (typing.NoReturn, RuntimeError(), False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
