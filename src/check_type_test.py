@@ -1,3 +1,4 @@
+import enum
 import sys
 import types
 import typing
@@ -33,6 +34,10 @@ class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
 
 
 class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
+
+
+Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
+Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
 
 
 @pytest.mark.parametrize(
@@ -104,6 +109,30 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (typing.Never, object, False),
         (typing.NoReturn, 1, False),
         (typing.NoReturn, RuntimeError(), False),
+        # Literal type hint
+        (typing.Literal[2], 2, True),
+        (typing.Literal[2], 3, False),
+        (typing.Literal[1, 2], 3, False),
+        (typing.Literal[1, 3], 3, True),
+        pytest.param(typing.Literal[True], 1, False, marks=pytest.mark.xfail),
+        pytest.param(typing.Literal[False], 0, False, marks=pytest.mark.xfail),
+        (typing.Literal[False], False, True),
+        (typing.Literal[False], True, False),
+        (typing.Literal["abcd"], True, False),
+        (typing.Literal["abcd", "ef"], "e", False),
+        (typing.Literal["abcd", "ef"], "abcd", True),
+        (typing.Literal["abcd", "ef"], "ef", True),
+        (typing.Literal[Bull.Twoo], Bull.Twoo, True),
+        (typing.Literal[Bull.Twoo], Bull.Faws, False),
+        pytest.param(typing.Literal[Bull.Twoo], 1, False, marks=pytest.mark.xfail),
+        (typing.Literal[Bull.Twoo], 0, False),
+        pytest.param(typing.Literal[Bull.Twoo], True, False, marks=pytest.mark.xfail),
+        (typing.Literal[Bull.Twoo], False, False),
+        (typing.Literal[Colors.BLUE], Colors.BLUE, True),
+        (typing.Literal[Colors.BLUE], Colors.RED, False),
+        (typing.Literal[Colors.BLUE], 2, False),
+        (typing.Literal[Colors.BLUE], "BLUE", False),
+        (typing.Literal[Colors.BLUE], "RED", False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
