@@ -38,6 +38,7 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 
 Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
 Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
+Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
 
 
 @pytest.mark.parametrize(
@@ -133,6 +134,21 @@ Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
         (typing.Literal[Colors.BLUE], 2, False),
         (typing.Literal[Colors.BLUE], "BLUE", False),
         (typing.Literal[Colors.BLUE], "RED", False),
+        (typing.Literal[Rotations.ROT90], Rotations.ROT90, True),
+        (typing.Literal[Rotations.ROT90], Rotations.ROT180, False),
+        (typing.Literal[Rotations.ROT90], Rotations.ROT90 | Rotations.ROT180, False),
+        (typing.Literal[Rotations.ROT90], Rotations.ROT90 | Rotations.ROT90, True),
+        (
+            typing.Literal[Rotations.ROT90 | Rotations.ROT180],
+            Rotations.ROT180 | Rotations.ROT90,
+            True,
+        ),
+        (typing.Literal[Rotations.ROT90 | Rotations.ROT180], Rotations.ROT90, False),
+        (typing.Literal[Rotations.ROT90, Rotations.ROT180], Rotations.ROT90, True),
+        (typing.Literal[Rotations.ROT90], 1, False),
+        (typing.Literal[Rotations.ROT180], 2, False),
+        (typing.Literal[Rotations(0)], Rotations(0), True),
+        (typing.Literal[Rotations(0)], Rotations(1), False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
