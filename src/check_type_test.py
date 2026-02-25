@@ -1,5 +1,6 @@
 import sys
 import types
+import typing
 from typing import Any
 
 from debug import pprint
@@ -94,10 +95,15 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
         (types.NoneType, None, True),
         (types.NoneType, 3.1, False),
         # Any type hint
-        (Any, 1, True),
-        (Any, None, True),
-        (Any, OneFieldClass(1), True),
-        (Any, OneFieldClass, True),
+        (typing.Any, 1, True),
+        (typing.Any, None, True),
+        (typing.Any, OneFieldClass(1), True),
+        (typing.Any, OneFieldClass, True),
+        # Never/NoReturn type hint
+        (typing.Never, 1, False),
+        (typing.Never, object, False),
+        (typing.NoReturn, 1, False),
+        (typing.NoReturn, RuntimeError(), False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:

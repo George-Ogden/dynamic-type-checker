@@ -1,6 +1,7 @@
 """This file is for the type checker to test on (not to be run directly)."""
 
 from collections.abc import Sequence
+import sys
 import types
 import typing
 from typing import Any, assert_type, cast
@@ -25,3 +26,6 @@ assert_type(strict_cast(types.NoneType, ()), None)
 
 # Unclear why this fails. See https://github.com/python/mypy/issues/20859.
 assert_type(strict_cast(typing.Any, "abc"), Any)  # type: ignore [assert-type]
+
+assert_type(strict_cast(typing.NoReturn, lambda: None), typing.Any)
+assert_type(strict_cast(typing.Never, sys.exit()), typing.Any)
