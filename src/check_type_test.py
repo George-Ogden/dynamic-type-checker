@@ -5,9 +5,11 @@ import typing
 from typing import Any
 
 from debug import pprint
+from inline_snapshot import snapshot
 import pytest
 
 from .check_type import check_type
+from .errors import MalformedTypeError
 
 
 class EmptyClass: ...
@@ -39,6 +41,10 @@ class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
 Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
 Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
+
+
+def a_function(a: int) -> int:
+    return a
 
 
 @pytest.mark.parametrize(
@@ -161,3 +167,36 @@ def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
     pprint(typ, prefix="typ = ", file=sys.stderr)
     pprint(obj, prefix="obj = ", file=sys.stderr)
     assert check_type(typ, obj) == succeeds
+
+
+@pytest.mark.parametrize(
+    "typ, obj, error_cls, error_message",
+    [
+        (
+            typing.Literal,
+            "blah",
+            MalformedTypeError,
+            snapshot("typing.Literal is not a valid type."),
+        ),
+        (
+            typing.Literal[int],
+            int,
+            MalformedTypeError,
+            snapshot("typing.Literal[int] is not a valid type."),
+        ),
+        (
+            typing.Literal[a_function],
+            a_function,
+            MalformedTypeError,
+            snapshot("typing.Literal[a_function] is not a valid type."),
+        ),
+    ],
+)
+def test_check_type_errors(
+    typ: Any, obj: object, error_cls: type[Exception], error_message: str
+) -> None:
+    pprint(typ, prefix="typ = ", file=sys.stderr)
+    pprint(obj, prefix="obj = ", file=sys.stderr)
+    with pytest.raises(error_cls) as e:
+        check_type(typ, obj)
+    assert str(e.value) == error_message
