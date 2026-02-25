@@ -149,6 +149,12 @@ Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
         (typing.Literal[Rotations.ROT180], 2, False),
         (typing.Literal[Rotations(0)], Rotations(0), True),
         (typing.Literal[Rotations(0)], Rotations(1), False),
+        (typing.Literal[None], None, True),  # noqa: PYI061
+        (typing.Literal[None], 1, False),  # noqa: PYI061
+        (typing.Literal[b"1234"], b"1234", True),
+        (typing.Literal[b"1234"], "1234", False),
+        (typing.Literal[b"1234"], int.from_bytes(b"1234"), False),
+        (typing.Literal[b"1234"], 1234, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
