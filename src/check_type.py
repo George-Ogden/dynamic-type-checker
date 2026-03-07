@@ -4,7 +4,7 @@ import enum
 import types
 import typing
 
-from .utils import TypeAnnotation
+from .utils import TypeAnnotation, is_in
 
 type SubChecker = typing.Callable[[TypeAnnotation, object], bool | None]
 _type_sub_checkers: list[SubChecker] = []
@@ -30,7 +30,7 @@ def check_any_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_never_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typ is typing.Never or typ is typing.NoReturn:
+    if is_in(typ, (typing.NoReturn, typing.Never)):
         return False
 
 
@@ -62,5 +62,5 @@ def check_type_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_union_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typing.get_origin(typ) is typing.Union or typing.get_origin(typ) is types.UnionType:
+    if is_in(typing.get_origin(typ), (typing.Union, types.UnionType)):
         return any(check_type(arg, obj) for arg in typing.get_args(typ))
