@@ -18,30 +18,30 @@ def check_type(typ: TypeAnnotation, obj: object, /) -> bool:
     raise NotImplementedError()
 
 
-def sub_checker(sub_checker: SubChecker) -> SubChecker:
+def register_sub_checker(sub_checker: SubChecker) -> SubChecker:
     _type_sub_checkers.append(sub_checker)
     return sub_checker
 
 
-@sub_checker
+@register_sub_checker
 def check_any_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is typing.Any:
         return True
 
 
-@sub_checker
+@register_sub_checker
 def check_never_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is typing.Never or typ is typing.NoReturn:
         return False
 
 
-@sub_checker
+@register_sub_checker
 def check_none_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is None:
         return obj is None
 
 
-@sub_checker
+@register_sub_checker
 def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is typing.Literal:
         raise MalformedTypeError(f"{typ} is not a valid type.")
@@ -54,7 +54,7 @@ def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
         return obj in typing.get_args(typ)
 
 
-@sub_checker
+@register_sub_checker
 def check_type_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if isinstance(typ, type):
         return isinstance(obj, typ)
