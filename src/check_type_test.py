@@ -1,3 +1,4 @@
+# ruff: noqa: UP007, RUF038, PYI030
 import enum
 import sys
 import types
@@ -168,6 +169,16 @@ def a_function(a: int) -> int:
         (typing.Literal[b"1234"], int.from_bytes(b"1234"), False),
         (typing.Literal[b"1234"], 1234, False),
         (typing.Literal[1, 2, 3], EqualityError(), False),
+        # union types
+        (typing.Union[int, str], 5, True),
+        (typing.Union[int, str], "5", True),
+        (typing.Union[int, str], b"5", False),
+        (typing.Union[int], 5, True),
+        (typing.Union[int], "", False),
+        (typing.Union[typing.Union[int, str], typing.Union[bool, None]], b"", False),
+        (typing.Union[typing.Union[int, str], typing.Union[bool, None]], None, True),
+        (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], True, True),
+        (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], 2, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
@@ -183,19 +194,36 @@ def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
             typing.Literal,
             "blah",
             MalformedTypeError,
-            snapshot("typing.Literal is not a valid type."),
+            snapshot("typing.Literal is not a valid type. typing.Literal requires type arguments."),
         ),
         (
             typing.Literal[int],
             int,
             MalformedTypeError,
-            snapshot("typing.Literal[int] is not a valid type."),
+            snapshot(
+                "typing.Literal[int] is not a valid type. typing.Literal types may only contain primitive or enum values."
+            ),
         ),
         (
             typing.Literal[a_function],
             a_function,
             MalformedTypeError,
-            snapshot("typing.Literal[a_function] is not a valid type."),
+            snapshot(
+                "typing.Literal[a_function] is not a valid type. typing.Literal types may only contain primitive or enum values."
+            ),
+        ),
+        (
+            typing.Union,
+            object(),
+            MalformedTypeError,
+            snapshot("typing.Union is not a valid type. typing.Union requires type arguments."),
+        ),
+        pytest.param(
+            typing.Union[bool, typing.Literal[int]],
+            False,
+            MalformedTypeError,
+            snapshot(),
+            marks=pytest.mark.xfail,
         ),
     ],
 )
