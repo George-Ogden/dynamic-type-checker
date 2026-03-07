@@ -5,8 +5,8 @@ import types
 import typing
 
 from .errors import MalformedTypeError
+from .utils import TypeAnnotation
 
-type TypeAnnotation = type | typing._SpecialForm | None
 type SubChecker = typing.Callable[[TypeAnnotation, object], bool | None]
 _type_sub_checkers: list[SubChecker] = []
 
@@ -44,13 +44,13 @@ def check_none_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 @register_sub_checker
 def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is typing.Literal:
-        raise MalformedTypeError(f"{typ} is not a valid type.")
+        raise MalformedTypeError(typ)
     if typing.get_origin(typ) is typing.Literal:
         if not all(
             isinstance(arg, int | bool | str | bytes | enum.Enum | types.NoneType)
             for arg in typing.get_args(typ)
         ):
-            raise MalformedTypeError(f"{typ} is not a valid type.")
+            raise MalformedTypeError(typ)
         return any(literal_equal(arg, obj) for arg in typing.get_args(typ))
 
 
