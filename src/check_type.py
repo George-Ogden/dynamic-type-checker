@@ -62,5 +62,5 @@ def check_type_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_union_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typing.get_origin(typ) is typing.Union:
+    if typing.get_origin(typ) is typing.Union or typing.get_origin(typ) is types.UnionType:
         return any(check_type(arg, obj) for arg in typing.get_args(typ))

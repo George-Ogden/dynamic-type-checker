@@ -146,6 +146,13 @@ from .test_utils import (
         (typing.Union[typing.Union[int, str], typing.Union[bool, None]], None, True),
         (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], True, True),
         (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], 2, False),
+        (int | str, 5, True),
+        (int | str, "5", True),
+        (int | str, b"5", False),
+        (typing.Union[int, str] | typing.Union[bool, None], b"", False),
+        (typing.Union[int, str] | typing.Union[bool, None], None, True),
+        (typing.Literal[0, 1] | typing.Literal[True, False], True, True),
+        (typing.Literal[0, 1] | typing.Literal[True, False], 2, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
