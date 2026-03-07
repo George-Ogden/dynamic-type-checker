@@ -46,8 +46,8 @@ def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if typ is typing.Literal:
         raise MalformedTypeError(f"{typ} is not a valid type.")
     if typing.get_origin(typ) is typing.Literal:
-        if any(
-            not isinstance(arg, int | bool | str | bytes | enum.Enum | types.NoneType)
+        if not all(
+            isinstance(arg, int | bool | str | bytes | enum.Enum | types.NoneType)
             for arg in typing.get_args(typ)
         ):
             raise MalformedTypeError(f"{typ} is not a valid type.")
