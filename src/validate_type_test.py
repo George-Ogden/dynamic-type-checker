@@ -46,6 +46,13 @@ from .validate_type import validate_type
                 "typing.Union[bool, typing.Literal[int]] is not a valid type. typing.Literal types may only contain primitive or enum values."
             ),
         ),
+        (
+            bool | typing.Literal[float],
+            MalformedTypeError,
+            snapshot(
+                "typing.Union[bool, typing.Literal[float]] is not a valid type. typing.Literal types may only contain primitive or enum values."
+            ),
+        ),
     ],
 )
 def test_validate_type(typ: Any, error_cls: type[Exception], error_message: str) -> None:
