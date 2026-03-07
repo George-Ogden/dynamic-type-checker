@@ -51,7 +51,15 @@ def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
             for arg in typing.get_args(typ)
         ):
             raise MalformedTypeError(f"{typ} is not a valid type.")
-        return obj in typing.get_args(typ)
+        return any(literal_equal(arg, obj) for arg in typing.get_args(typ))
+
+
+def literal_equal(literal_arg: int | bool | str | bytes | enum.Enum | None, obj: object) -> bool:
+    if type(literal_arg) is type(obj):
+        if isinstance(literal_arg, enum.Enum | types.NoneType):
+            return literal_arg is obj
+        return literal_arg == obj
+    return False
 
 
 @register_sub_checker

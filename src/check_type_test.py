@@ -38,6 +38,11 @@ class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
 class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
 
 
+class EqualityError:
+    def __eq__(self, other: object) -> bool:
+        raise NotImplementedError()
+
+
 Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
 Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
 Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
@@ -121,8 +126,8 @@ def a_function(a: int) -> int:
         (typing.Literal[2], 3, False),
         (typing.Literal[1, 2], 3, False),
         (typing.Literal[1, 3], 3, True),
-        pytest.param(typing.Literal[True], 1, False, marks=pytest.mark.xfail),
-        pytest.param(typing.Literal[False], 0, False, marks=pytest.mark.xfail),
+        (typing.Literal[True], 1, False),
+        (typing.Literal[False], 0, False),
         (typing.Literal[False], False, True),
         (typing.Literal[False], True, False),
         (typing.Literal["abcd"], True, False),
@@ -131,9 +136,10 @@ def a_function(a: int) -> int:
         (typing.Literal["abcd", "ef"], "ef", True),
         (typing.Literal[Bull.Twoo], Bull.Twoo, True),
         (typing.Literal[Bull.Twoo], Bull.Faws, False),
-        pytest.param(typing.Literal[Bull.Twoo], 1, False, marks=pytest.mark.xfail),
+        (typing.Literal[1], Bull.Twoo, False),
+        (typing.Literal[Bull.Twoo], 1, False),
         (typing.Literal[Bull.Twoo], 0, False),
-        pytest.param(typing.Literal[Bull.Twoo], True, False, marks=pytest.mark.xfail),
+        (typing.Literal[Bull.Twoo], True, False),
         (typing.Literal[Bull.Twoo], False, False),
         (typing.Literal[Colors.BLUE], Colors.BLUE, True),
         (typing.Literal[Colors.BLUE], Colors.RED, False),
@@ -161,6 +167,7 @@ def a_function(a: int) -> int:
         (typing.Literal[b"1234"], "1234", False),
         (typing.Literal[b"1234"], int.from_bytes(b"1234"), False),
         (typing.Literal[b"1234"], 1234, False),
+        (typing.Literal[1, 2, 3], EqualityError(), False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
