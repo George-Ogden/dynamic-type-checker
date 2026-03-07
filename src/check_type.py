@@ -4,7 +4,6 @@ import enum
 import types
 import typing
 
-from .errors import MalformedTypeError
 from .utils import TypeAnnotation
 
 type SubChecker = typing.Callable[[TypeAnnotation, object], bool | None]
@@ -43,16 +42,7 @@ def check_none_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typ is typing.Literal:
-        raise MalformedTypeError(typ, requires_arguments=True)
     if typing.get_origin(typ) is typing.Literal:
-        if not all(
-            isinstance(arg, int | bool | str | bytes | enum.Enum | types.NoneType)
-            for arg in typing.get_args(typ)
-        ):
-            raise MalformedTypeError(
-                typ, extra_msg=f"{typing.Literal} types may only contain primitive or enum values."
-            )
         return any(literal_equal(arg, obj) for arg in typing.get_args(typ))
 
 
@@ -72,7 +62,5 @@ def check_type_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_union_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typ is typing.Union:
-        raise MalformedTypeError(typ, requires_arguments=True)
     if typing.get_origin(typ) is typing.Union:
         return any(check_type(arg, obj) for arg in typing.get_args(typ))

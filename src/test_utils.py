@@ -1,0 +1,42 @@
+import enum
+from typing import Any
+
+
+class EmptyClass: ...
+
+
+class OneFieldClass:  # noqa: B903
+    def __init__(self, x: Any) -> None:
+        self.x = x
+
+
+class MetaclassIsInstance(type):
+    def __instancecheck__(cls, instance: object) -> bool:
+        return cls.is_instance(instance)
+
+    @classmethod
+    def is_instance(cls, x: object) -> bool:
+        return issubclass(type(x), cls)
+
+
+class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
+    @classmethod
+    def is_instance(cls, x: object) -> bool:
+        return isinstance(x, int) and x > 0
+
+
+class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
+
+
+class EqualityError:
+    def __eq__(self, other: object) -> bool:
+        raise NotImplementedError()
+
+
+Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
+Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
+Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
+
+
+def a_function(a: int) -> int:
+    return a

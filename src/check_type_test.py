@@ -1,56 +1,23 @@
 # ruff: noqa: UP007, RUF038, PYI030
-import enum
 import sys
 import types
 import typing
 from typing import Any
 
 from debug import pprint
-from inline_snapshot import snapshot
 import pytest
 
 from .check_type import check_type
-from .errors import MalformedTypeError
-
-
-class EmptyClass: ...
-
-
-class OneFieldClass:  # noqa: B903
-    def __init__(self, x: Any) -> None:
-        self.x = x
-
-
-class MetaclassIsInstance(type):
-    def __instancecheck__(cls, instance: object) -> bool:
-        return cls.is_instance(instance)
-
-    @classmethod
-    def is_instance(cls, x: object) -> bool:
-        return issubclass(type(x), cls)
-
-
-class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
-    @classmethod
-    def is_instance(cls, x: object) -> bool:
-        return isinstance(x, int) and x > 0
-
-
-class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
-
-
-class EqualityError:
-    def __eq__(self, other: object) -> bool:
-        raise NotImplementedError()
-
-
-Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
-Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
-Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
-
-
-def a_function(a: int) -> int:
-    return a
+from .test_utils import (
+    Bull,
+    Colors,
+    CustomMetaclassIsInstance,
+    CustomMetaclassSubclassIsInstance,
+    EmptyClass,
+    EqualityError,
+    OneFieldClass,
+    Rotations,
+)
 
 
 @pytest.mark.parametrize(
@@ -185,53 +152,3 @@ def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
     pprint(typ, prefix="typ = ", file=sys.stderr)
     pprint(obj, prefix="obj = ", file=sys.stderr)
     assert check_type(typ, obj) == succeeds
-
-
-@pytest.mark.parametrize(
-    "typ, obj, error_cls, error_message",
-    [
-        (
-            typing.Literal,
-            "blah",
-            MalformedTypeError,
-            snapshot("typing.Literal is not a valid type. typing.Literal requires type arguments."),
-        ),
-        (
-            typing.Literal[int],
-            int,
-            MalformedTypeError,
-            snapshot(
-                "typing.Literal[int] is not a valid type. typing.Literal types may only contain primitive or enum values."
-            ),
-        ),
-        (
-            typing.Literal[a_function],
-            a_function,
-            MalformedTypeError,
-            snapshot(
-                "typing.Literal[a_function] is not a valid type. typing.Literal types may only contain primitive or enum values."
-            ),
-        ),
-        (
-            typing.Union,
-            object(),
-            MalformedTypeError,
-            snapshot("typing.Union is not a valid type. typing.Union requires type arguments."),
-        ),
-        pytest.param(
-            typing.Union[bool, typing.Literal[int]],
-            False,
-            MalformedTypeError,
-            snapshot(),
-            marks=pytest.mark.xfail,
-        ),
-    ],
-)
-def test_check_type_errors(
-    typ: Any, obj: object, error_cls: type[Exception], error_message: str
-) -> None:
-    pprint(typ, prefix="typ = ", file=sys.stderr)
-    pprint(obj, prefix="obj = ", file=sys.stderr)
-    with pytest.raises(error_cls) as e:
-        check_type(typ, obj)
-    assert str(e.value) == error_message
