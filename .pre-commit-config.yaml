@@ -8,7 +8,7 @@ ci:
 
 repos:
   - repo: https://github.com/George-Ogden/mirror-rorrim/
-    rev: v0.4.5
+    rev: v0.4.7
     hooks:
       - id: mirror-check
         fail_fast: true
@@ -45,7 +45,7 @@ repos:
         files: ^src/
 
   - repo: https://github.com/George-Ogden/linter/
-    rev: v2.1.0
+    rev: v2.1.1
     hooks:
       - id: lint
         args: [--fix]
@@ -57,7 +57,7 @@ repos:
         args: [--severity=warning]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit/
-    rev: v0.15.2
+    rev: v0.15.5
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -75,9 +75,10 @@ repos:
       - id: actionlint
 
   - repo: https://github.com/codespell-project/codespell/
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
+        args: [-L, Twoo]
 
   - repo: https://github.com/George-Ogden/pre-commit-hooks/
     rev: v2.4.0
