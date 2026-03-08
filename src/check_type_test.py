@@ -17,9 +17,13 @@ from .test_utils import (
     EqualityError,
     IntAlias,
     IntAliasAlias,
+    One,
     OneFieldClass,
     Rotations,
     UnionAlias,
+    Zero,
+    ZeroOrOneLiteral,
+    ZeroOrOneUnion,
 )
 from .utils import TypeAnnotation
 
@@ -169,6 +173,13 @@ from .utils import TypeAnnotation
         (AClassAlias, OneFieldClass("bob"), True),
         (AClassAlias, OneFieldClass, False),
         (AClassAlias, "bob", False),
+        (ZeroOrOneUnion, True, True),
+        (typing.Literal[Zero, One], 0, True),
+        (ZeroOrOneUnion, 0, True),
+        (ZeroOrOneLiteral, 1, True),
+        (ZeroOrOneLiteral, False, True),
+        (ZeroOrOneLiteral, 2, False),
+        (ZeroOrOneUnion, 2, False),
     ],
 )
 def test_check_type(typ: TypeAnnotation, obj: object, succeeds: bool) -> None:

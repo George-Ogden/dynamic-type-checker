@@ -1,6 +1,7 @@
 # ruff: noqa: UP040
+# mypy: disable-error-code="misc,valid-type"
 import enum
-from typing import Any, TypeAlias, TypeAliasType
+from typing import Any, Literal, TypeAlias, TypeAliasType
 
 
 class EmptyClass: ...
@@ -48,3 +49,10 @@ type UnionAlias = int | str | OneFieldClass
 type IntAliasAlias = IntAlias
 ClassAlias: TypeAlias = OneFieldClass
 AClassAlias = TypeAliasType("AClassAlias", OneFieldClass)
+
+type Zero = Literal[False, 0]
+type One = Literal[True, 1]
+type ZeroOrOneLiteral = Literal[Zero, One]
+type ZeroOrOneUnion = Zero | One
+
+type InvalidLiteral = Literal
