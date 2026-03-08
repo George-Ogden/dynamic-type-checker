@@ -1,5 +1,6 @@
+# ruff: noqa: UP040
 import enum
-from typing import Any
+from typing import Any, TypeAlias, TypeAliasType
 
 
 class EmptyClass: ...
@@ -40,3 +41,10 @@ Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
 
 def a_function(a: int) -> int:
     return a
+
+
+type IntAlias = int
+type UnionAlias = int | str | OneFieldClass
+type IntAliasAlias = IntAlias
+ClassAlias: TypeAlias = OneFieldClass
+AClassAlias = TypeAliasType("AClassAlias", OneFieldClass)
