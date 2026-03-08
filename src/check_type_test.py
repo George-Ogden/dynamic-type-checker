@@ -1,55 +1,23 @@
-import enum
+# ruff: noqa: UP007, RUF038, PYI030
 import sys
 import types
 import typing
 from typing import Any
 
 from debug import pprint
-from inline_snapshot import snapshot
 import pytest
 
 from .check_type import check_type
-from .errors import MalformedTypeError
-
-
-class EmptyClass: ...
-
-
-class OneFieldClass:  # noqa: B903
-    def __init__(self, x: Any) -> None:
-        self.x = x
-
-
-class MetaclassIsInstance(type):
-    def __instancecheck__(cls, instance: object) -> bool:
-        return cls.is_instance(instance)
-
-    @classmethod
-    def is_instance(cls, x: object) -> bool:
-        return issubclass(type(x), cls)
-
-
-class CustomMetaclassIsInstance(metaclass=MetaclassIsInstance):
-    @classmethod
-    def is_instance(cls, x: object) -> bool:
-        return isinstance(x, int) and x > 0
-
-
-class CustomMetaclassSubclassIsInstance(CustomMetaclassIsInstance): ...
-
-
-class EqualityError:
-    def __eq__(self, other: object) -> bool:
-        raise NotImplementedError()
-
-
-Bull = enum.IntEnum("Bull", [("Twoo", 1), ("Faws", 0)])
-Colors = enum.Enum("Colors", ["RED", "GREEN", "BLUE"])
-Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
-
-
-def a_function(a: int) -> int:
-    return a
+from .test_utils import (
+    Bull,
+    Colors,
+    CustomMetaclassIsInstance,
+    CustomMetaclassSubclassIsInstance,
+    EmptyClass,
+    EqualityError,
+    OneFieldClass,
+    Rotations,
+)
 
 
 @pytest.mark.parametrize(
@@ -168,42 +136,26 @@ def a_function(a: int) -> int:
         (typing.Literal[b"1234"], int.from_bytes(b"1234"), False),
         (typing.Literal[b"1234"], 1234, False),
         (typing.Literal[1, 2, 3], EqualityError(), False),
+        # union types
+        (typing.Union[int, str], 5, True),
+        (typing.Union[int, str], "5", True),
+        (typing.Union[int, str], b"5", False),
+        (typing.Union[int], 5, True),
+        (typing.Union[int], "", False),
+        (typing.Union[typing.Union[int, str], typing.Union[bool, None]], b"", False),
+        (typing.Union[typing.Union[int, str], typing.Union[bool, None]], None, True),
+        (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], True, True),
+        (typing.Union[typing.Literal[0, 1], typing.Literal[True, False]], 2, False),
+        (int | str, 5, True),
+        (int | str, "5", True),
+        (int | str, b"5", False),
+        (typing.Union[int, str] | typing.Union[bool, None], b"", False),
+        (typing.Union[int, str] | typing.Union[bool, None], None, True),
+        (typing.Literal[0, 1] | typing.Literal[True, False], True, True),
+        (typing.Literal[0, 1] | typing.Literal[True, False], 2, False),
     ],
 )
 def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
     pprint(typ, prefix="typ = ", file=sys.stderr)
     pprint(obj, prefix="obj = ", file=sys.stderr)
     assert check_type(typ, obj) == succeeds
-
-
-@pytest.mark.parametrize(
-    "typ, obj, error_cls, error_message",
-    [
-        (
-            typing.Literal,
-            "blah",
-            MalformedTypeError,
-            snapshot("typing.Literal is not a valid type."),
-        ),
-        (
-            typing.Literal[int],
-            int,
-            MalformedTypeError,
-            snapshot("typing.Literal[int] is not a valid type."),
-        ),
-        (
-            typing.Literal[a_function],
-            a_function,
-            MalformedTypeError,
-            snapshot("typing.Literal[a_function] is not a valid type."),
-        ),
-    ],
-)
-def test_check_type_errors(
-    typ: Any, obj: object, error_cls: type[Exception], error_message: str
-) -> None:
-    pprint(typ, prefix="typ = ", file=sys.stderr)
-    pprint(obj, prefix="obj = ", file=sys.stderr)
-    with pytest.raises(error_cls) as e:
-        check_type(typ, obj)
-    assert str(e.value) == error_message

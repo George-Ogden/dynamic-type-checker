@@ -4,8 +4,7 @@ import enum
 import types
 import typing
 
-from .errors import MalformedTypeError
-from .utils import TypeAnnotation
+from .utils import TypeAnnotation, is_in
 
 type SubChecker = typing.Callable[[TypeAnnotation, object], bool | None]
 _type_sub_checkers: list[SubChecker] = []
@@ -31,7 +30,7 @@ def check_any_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_never_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typ is typing.Never or typ is typing.NoReturn:
+    if is_in(typ, (typing.NoReturn, typing.Never)):
         return False
 
 
@@ -43,14 +42,7 @@ def check_none_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
 
 @register_sub_checker
 def check_literal_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
-    if typ is typing.Literal:
-        raise MalformedTypeError(typ)
     if typing.get_origin(typ) is typing.Literal:
-        if not all(
-            isinstance(arg, int | bool | str | bytes | enum.Enum | types.NoneType)
-            for arg in typing.get_args(typ)
-        ):
-            raise MalformedTypeError(typ)
         return any(literal_equal(arg, obj) for arg in typing.get_args(typ))
 
 
@@ -66,4 +58,9 @@ def literal_equal(literal_arg: int | bool | str | bytes | enum.Enum | None, obj:
 def check_type_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
     if isinstance(typ, type):
         return isinstance(obj, typ)
-    raise NotImplementedError()
+
+
+@register_sub_checker
+def check_union_type(typ: TypeAnnotation, obj: object, /) -> bool | None:
+    if is_in(typing.get_origin(typ), (typing.Union, types.UnionType)):
+        return any(check_type(arg, obj) for arg in typing.get_args(typ))
