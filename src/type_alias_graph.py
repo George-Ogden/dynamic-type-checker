@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from collections import deque
 from collections.abc import Iterable, Sequence
+import contextlib
 import types
 import typing
-from typing import Self, TypeAliasType, cast, final
+from typing import TYPE_CHECKING, Self, TypeAliasType, cast, final
 
 import attrs
 
@@ -10,32 +13,19 @@ from .utils import TypeAnnotation, is_in
 
 type TypeAliasCycle = Sequence[TypeAliasType]
 
+if TYPE_CHECKING:
+    from bidict import bidict
+
 
 @final
 @attrs.frozen
 class TypeAliasNode:
     typ: TypeAliasType
-    children: Sequence[Self] = attrs.field(factory=list)
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, type(self))
-            and self.typ == other.typ
-            and self._child_types_set == other._child_types_set
-        )
-
-    def __hash__(self) -> int:
-        return hash(self.typ)
-
-    @property
-    def _child_types_set(self) -> set[TypeAliasType]:
-        return {child.typ for child in self.children}
+    children: Sequence[Self] = attrs.field(factory=list, eq=False, hash=False)
 
     def find_cycle(self, history: list[Self], explored: set[Self]) -> list[Self] | None:
-        try:
+        with contextlib.suppress(ValueError):
             return history[history.index(self) :]
-        except ValueError:
-            ...
         if self in explored:
             return None
         history.append(self)
@@ -46,6 +36,15 @@ class TypeAliasNode:
         assert history[-1] == self
         history.pop()
         return None
+
+    def _assert_test_eq(self, other: Self, equality: bidict) -> None:
+        assert self.typ == other.typ
+        if id(self) in equality:
+            assert equality[id(self)] == id(other)
+            return
+        equality[id(self)] = id(other)
+        for self_child, other_child in zip(self.children, other.children, strict=True):
+            self_child._assert_test_eq(other_child, equality)
 
 
 @attrs.frozen
@@ -85,3 +84,11 @@ class TypeAliasGraph:
         if cycle is None:
             return None
         return [node.typ for node in cycle]
+
+    def _assert_test_eq(self, other: Self) -> None:
+        from bidict import bidict
+
+        try:
+            return self.root._assert_test_eq(other.root, bidict())
+        except Exception as e:
+            raise AssertionError(f"{self} != {other}") from e
