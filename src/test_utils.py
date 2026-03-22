@@ -1,7 +1,29 @@
 # ruff: noqa: UP040
 # mypy: disable-error-code="misc,valid-type"
+from collections.abc import Iterable
 import enum
-from typing import Any, Literal, TypeAlias, TypeAliasType
+import inspect
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeAliasType, final
+
+import pytest
+
+if TYPE_CHECKING:
+    from mypy_pytest_plugin_types import ParameterSet
+
+
+def cases[Self: type](cls: Self) -> Iterable["ParameterSet[Self]"]:
+    for name, method in inspect.getmembers(cls, predicate=inspect.ismethod):
+        if name != "cases" and not name.startswith("_"):
+            yield pytest.param(method(), id=name)
+
+
+@pytest.mark.typed
+def test_case[T: type](cls: T) -> T:
+    cls.cases = classmethod(cases)  # type: ignore [attr-defined]
+    return final(cls)
+
+
+test_case.__test__ = False
 
 
 class EmptyClass: ...
@@ -56,3 +78,11 @@ type ZeroOrOneLiteral = Literal[Zero, One]
 type ZeroOrOneUnion = Zero | One
 
 type InvalidLiteral = Literal
+
+type RecursiveTypeAlias = RecursiveTypeAlias
+type MutuallyRecursiveTypeAlias1 = MutuallyRecursiveTypeAlias2
+type MutuallyRecursiveTypeAlias2 = MutuallyRecursiveTypeAlias1
+type RecursiveUnionType = RecursiveUnionType | int
+type RecursiveLiteralType = Literal[RecursiveLiteralType]
+
+type DiamondType = IntAlias | IntAliasAlias
