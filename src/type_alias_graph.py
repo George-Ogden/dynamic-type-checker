@@ -8,6 +8,8 @@ import attrs
 
 from .utils import TypeAnnotation, is_in
 
+type TypeAliasCycle = Sequence[TypeAliasType]
+
 
 @final
 @attrs.frozen
@@ -22,21 +24,33 @@ class TypeAliasNode:
             and self._child_types_set == other._child_types_set
         )
 
+    def __hash__(self) -> int:
+        return hash(self.typ)
+
     @property
     def _child_types_set(self) -> set[TypeAliasType]:
         return {child.typ for child in self.children}
 
-    def __hash__(self) -> int:
-        return hash(self.typ)
+    def find_cycle(self, history: list[Self], explored: set[Self]) -> list[Self] | None:
+        try:
+            return history[history.index(self) :]
+        except ValueError:
+            ...
+        if self in explored:
+            return None
+        history.append(self)
+        for child in self.children:
+            if (cycle := child.find_cycle(history, explored)) is not None:
+                return cycle
+        explored.add(self)
+        assert history[-1] == self
+        history.pop()
+        return None
 
 
 @attrs.frozen
 class TypeAliasGraph:
-    nodes: Sequence[TypeAliasNode]
-
-    @classmethod
-    def from_nodes(cls, nodes: Iterable[TypeAliasNode]) -> Self:
-        return cls(tuple(nodes))
+    root: TypeAliasNode
 
     @classmethod
     def from_type_alias_type(cls, typ: TypeAliasType) -> Self:
@@ -54,7 +68,7 @@ class TypeAliasGraph:
                 cast(list[TypeAliasNode], type_alias_to_node[current_typ].children).append(
                     child_node
                 )
-        return cls.from_nodes(type_alias_to_node.values())
+        return cls(type_alias_to_node[typ])
 
     @classmethod
     def expand_type(cls, typ: TypeAnnotation) -> Iterable[TypeAliasType]:
@@ -64,5 +78,10 @@ class TypeAliasGraph:
             for arg in typing.get_args(typ):
                 yield from cls.expand_type(arg)
 
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, type(self)) and set(self.nodes) == set(other.nodes)
+    @classmethod
+    def find_cycle(cls, alias: TypeAliasType) -> TypeAliasCycle | None:
+        graph = cls.from_type_alias_type(alias)
+        cycle = graph.root.find_cycle([], set())
+        if cycle is None:
+            return None
+        return [node.typ for node in cycle]
