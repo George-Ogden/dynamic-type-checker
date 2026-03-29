@@ -18,7 +18,7 @@ def _validate_type(typ: TypeAnnotation, original_typ: TypeAnnotation) -> None:
         _validate_type(typ.__value__, original_typ)
     if is_in(typ, (typing.Literal, typing.Union)):
         raise MalformedTypeError(
-            original_typ, extra_msg=MalformedTypeError.requires_arguments_message(typ)
+            original_typ, extra_msg=MalformedTypeError.requires_arguments_msg(typ)
         )
     if typing.get_origin(typ) is typing.Literal:
         for type_arg in typing.get_args(typ):

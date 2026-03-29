@@ -23,7 +23,7 @@ from .validate_type import validate_type
 
 
 @pytest.mark.parametrize(
-    "typ, error_cls, error_message",
+    "typ, error_cls, error_msg",
     [
         (
             typing.Literal,
@@ -142,9 +142,9 @@ from .validate_type import validate_type
         ),
     ],
 )
-def test_validate_type(typ: Any, error_cls: type[Exception], error_message: str) -> None:
+def test_validate_type(typ: Any, error_cls: type[Exception], error_msg: str) -> None:
     pprint(typ, prefix="typ = ", file=sys.stderr)
     with pytest.raises(error_cls) as e:
         validate_type(typ)
-    assert str(e.value) == error_message
+    assert str(e.value) == error_msg
     assert type(e.value) is error_cls

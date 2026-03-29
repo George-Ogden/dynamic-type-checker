@@ -18,7 +18,7 @@ class MalformedTypeError(TypeError):
         return msg
 
     @classmethod
-    def requires_arguments_message(cls, typ: TypeAnnotation) -> str:
+    def requires_arguments_msg(cls, typ: TypeAnnotation) -> str:
         return f"{typ} requires type arguments."
 
 
