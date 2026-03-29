@@ -82,6 +82,9 @@ type InvalidLiteral = Literal
 type RecursiveTypeAlias = RecursiveTypeAlias
 type MutuallyRecursiveTypeAlias1 = MutuallyRecursiveTypeAlias2
 type MutuallyRecursiveTypeAlias2 = MutuallyRecursiveTypeAlias1
+type BigMutuallyRecursiveTypeAlias1 = BigMutuallyRecursiveTypeAlias2
+type BigMutuallyRecursiveTypeAlias2 = BigMutuallyRecursiveTypeAlias3
+type BigMutuallyRecursiveTypeAlias3 = BigMutuallyRecursiveTypeAlias1
 type RecursiveUnionType = RecursiveUnionType | int
 type RecursiveLiteralType = Literal[RecursiveLiteralType]
 

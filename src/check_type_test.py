@@ -13,6 +13,7 @@ from .test_utils import (
     Colors,
     CustomMetaclassIsInstance,
     CustomMetaclassSubclassIsInstance,
+    DiamondType,
     EmptyClass,
     EqualityError,
     IntAlias,
@@ -180,6 +181,8 @@ from .utils import TypeAnnotation
         (ZeroOrOneLiteral, False, True),
         (ZeroOrOneLiteral, 2, False),
         (ZeroOrOneUnion, 2, False),
+        (DiamondType, 3, True),
+        (DiamondType, "hi", False),
     ],
 )
 def test_check_type(typ: TypeAnnotation, obj: object, succeeds: bool) -> None:
