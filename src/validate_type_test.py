@@ -120,10 +120,10 @@ from .validate_type import validate_type
             ),
         ),
         (
-            BigMutuallyRecursiveTypeAlias3,
+            BigMutuallyRecursiveTypeAlias3 | None,
             CyclicTypeError,
             snapshot(
-                "BigMutuallyRecursiveTypeAlias3 is not a valid type. The types BigMutuallyRecursiveTypeAlias3, BigMutuallyRecursiveTypeAlias1 and BigMutuallyRecursiveTypeAlias2 are defined in terms of each other."
+                "BigMutuallyRecursiveTypeAlias3 | None is not a valid type. The types BigMutuallyRecursiveTypeAlias3, BigMutuallyRecursiveTypeAlias1 and BigMutuallyRecursiveTypeAlias2 are defined in terms of each other."
             ),
         ),
         (
