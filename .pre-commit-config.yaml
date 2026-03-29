@@ -1,5 +1,6 @@
 default_stages: [pre-commit]
-default_install_hook_types: [pre-commit, prepare-commit-msg, commit-msg]
+default_install_hook_types:
+  [pre-commit, prepare-commit-msg, commit-msg, post-commit, pre-push]
 
 ci:
   skip:
@@ -8,7 +9,7 @@ ci:
 
 repos:
   - repo: https://github.com/George-Ogden/mirror-rorrim/
-    rev: v0.4.7
+    rev: v0.4.9
     hooks:
       - id: mirror-check
         fail_fast: true
@@ -33,7 +34,7 @@ repos:
           LOG=$(mktemp)
           EXITCODE=0
           for file in "$@"; do
-            if grep -nE "from +src\." "$file" >"$LOG"; then
+            if grep -nE "from +dynamic_type_checker\." "$file" >"$LOG"; then
               while IFS= read -r line; do
                 printf "Absolute import found in %s:%s\n" "$file" "$line"
                 EXITCODE=1
@@ -42,7 +43,7 @@ repos:
           done
           exit $EXITCODE
           ' --
-        files: ^src/
+        files: ^dynamic_type_checker/
 
   - repo: https://github.com/George-Ogden/linter/
     rev: v2.1.1
@@ -57,7 +58,7 @@ repos:
         args: [--severity=warning]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit/
-    rev: v0.15.5
+    rev: v0.15.8
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -81,7 +82,7 @@ repos:
         args: [-L, Twoo]
 
   - repo: https://github.com/George-Ogden/pre-commit-hooks/
-    rev: v2.4.0
+    rev: v3.1.0
     hooks:
       - id: check-merge-conflict
       - id: dbg-check

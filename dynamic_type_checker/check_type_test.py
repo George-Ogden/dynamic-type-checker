@@ -2,22 +2,31 @@
 import sys
 import types
 import typing
-from typing import Any
 
 from debug import pprint
 import pytest
 
 from .check_type import check_type
 from .test_utils import (
+    AClassAlias,
     Bull,
     Colors,
     CustomMetaclassIsInstance,
     CustomMetaclassSubclassIsInstance,
+    DiamondType,
     EmptyClass,
     EqualityError,
+    IntAlias,
+    IntAliasAlias,
+    One,
     OneFieldClass,
     Rotations,
+    UnionAlias,
+    Zero,
+    ZeroOrOneLiteral,
+    ZeroOrOneUnion,
 )
+from .utils import TypeAnnotation
 
 
 @pytest.mark.parametrize(
@@ -153,9 +162,30 @@ from .test_utils import (
         (typing.Union[int, str] | typing.Union[bool, None], None, True),
         (typing.Literal[0, 1] | typing.Literal[True, False], True, True),
         (typing.Literal[0, 1] | typing.Literal[True, False], 2, False),
+        (IntAlias, 10, True),
+        (IntAlias, 10.3, False),
+        (UnionAlias, OneFieldClass(3), True),
+        (UnionAlias, 3, True),
+        (UnionAlias, None, False),
+        (IntAlias, IntAlias, False),
+        (IntAliasAlias, 3, True),
+        (IntAliasAlias, IntAlias, False),
+        (IntAliasAlias, "3", False),
+        (AClassAlias, OneFieldClass("bob"), True),
+        (AClassAlias, OneFieldClass, False),
+        (AClassAlias, "bob", False),
+        (ZeroOrOneUnion, True, True),
+        (typing.Literal[Zero, One], 0, True),
+        (ZeroOrOneUnion, 0, True),
+        (ZeroOrOneLiteral, 1, True),
+        (ZeroOrOneLiteral, False, True),
+        (ZeroOrOneLiteral, 2, False),
+        (ZeroOrOneUnion, 2, False),
+        (DiamondType, 3, True),
+        (DiamondType, "hi", False),
     ],
 )
-def test_check_type(typ: Any, obj: object, succeeds: bool) -> None:
+def test_check_type(typ: TypeAnnotation, obj: object, succeeds: bool) -> None:
     pprint(typ, prefix="typ = ", file=sys.stderr)
     pprint(obj, prefix="obj = ", file=sys.stderr)
     assert check_type(typ, obj) == succeeds

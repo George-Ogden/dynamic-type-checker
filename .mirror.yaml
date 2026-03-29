@@ -16,3 +16,4 @@ repos:
       - requirements.txt
       - ruff.toml
       - version.txt
+      - .github/workflows/pypi-publish.yaml: .github/pypi-publish.yaml

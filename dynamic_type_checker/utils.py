@@ -1,6 +1,8 @@
-from typing import Any, TypeGuard, _SpecialForm
+import types
+import typing
+from typing import Any, TypeGuard
 
-type TypeAnnotation = type | _SpecialForm | None
+type TypeAnnotation = type | typing._SpecialForm | typing.TypeAliasType | types.UnionType | None
 
 
 def is_in[T](item: Any, container: tuple[T, ...]) -> TypeGuard[T]:
