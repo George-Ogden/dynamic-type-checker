@@ -13,4 +13,4 @@ jobs:
   tag-and-release:
     uses: George-Ogden/actions/.github/workflows/python-release.yaml@v4.3.0
     with:
-      validation-code: ""
+      validation-code: "from dynamic_type_checker import check_type; from typing import Literal; check_type(Literal[4], 4)"
