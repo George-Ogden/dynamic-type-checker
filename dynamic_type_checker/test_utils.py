@@ -44,6 +44,11 @@ def a_function(a: int) -> int:
     return a
 
 
+class CallableClass:
+    def __call__(self, x: int) -> int:
+        return x
+
+
 type IntAlias = int
 type UnionAlias = int | str | OneFieldClass
 type IntAliasAlias = IntAlias
