@@ -1,6 +1,7 @@
 from typing import NamedTuple, Self, TypeAliasType, cast
 
 import pytest
+from utils.test_utils import test_case
 
 from .test_utils import (
     DiamondType,
@@ -15,7 +16,6 @@ from .test_utils import (
     Zero,
     ZeroOrOneLiteral,
     ZeroOrOneUnion,
-    test_case,
 )
 from .type_alias_graph import TypeAliasCycle, TypeAliasGraph, TypeAliasNode
 
