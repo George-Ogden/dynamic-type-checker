@@ -4,6 +4,9 @@ from typing import TypeAliasType
 from .utils import TypeAnnotation
 
 
+class TypeCheckError(TypeError): ...
+
+
 class MalformedTypeError(TypeError):
     def __init__(self, typ: TypeAnnotation, *, extra_msg: str = "") -> None:
         self.typ = typ

@@ -3,6 +3,7 @@ from typing import Any
 from inline_snapshot import snapshot
 import pytest
 
+from .errors import TypeCheckError
 from .strict_cast import generate_type_error, strict_cast
 
 
@@ -23,6 +24,7 @@ def test_strict_cast(typ: Any, obj: object, succeeds: bool) -> None:
         with pytest.raises(TypeError) as e:
             strict_cast(typ, obj)
         assert str(e.value) == str(generate_type_error(typ, obj))
+        assert isinstance(e.value, TypeCheckError)
 
 
 @pytest.mark.parametrize(
@@ -38,4 +40,5 @@ def test_strict_cast(typ: Any, obj: object, succeeds: bool) -> None:
 def test_generate_type_error(typ: Any, obj: object, error_msg: str) -> None:
     error = generate_type_error(typ, obj)
     assert isinstance(error, TypeError)
+    assert isinstance(error, TypeCheckError)
     assert str(error) == error_msg
