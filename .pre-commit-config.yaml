@@ -34,7 +34,7 @@ repos:
           LOG=$(mktemp)
           EXITCODE=0
           for file in "$@"; do
-            if grep -nE "from +src\." "$file" >"$LOG"; then
+            if grep -nE "from +dynamic_type_checker\." "$file" >"$LOG"; then
               while IFS= read -r line; do
                 printf "Absolute import found in %s:%s\n" "$file" "$line"
                 EXITCODE=1
@@ -43,7 +43,7 @@ repos:
           done
           exit $EXITCODE
           ' --
-        files: ^src/
+        files: ^dynamic_type_checker/
 
   - repo: https://github.com/George-Ogden/linter/
     rev: v2.1.1
