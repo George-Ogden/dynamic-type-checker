@@ -24,27 +24,6 @@ repos:
       - id: trailing-whitespace
       - id: requirements-txt-fixer
 
-  - repo: local
-    hooks:
-      - id: check-absolute-imports
-        name: Check for absolute imports
-        language: system
-        entry: |
-          bash -c '
-          LOG=$(mktemp)
-          EXITCODE=0
-          for file in "$@"; do
-            if grep -nE "from +dynamic_type_checker\." "$file" >"$LOG"; then
-              while IFS= read -r line; do
-                printf "Absolute import found in %s:%s\n" "$file" "$line"
-                EXITCODE=1
-              done <"$LOG"
-            fi
-          done
-          exit $EXITCODE
-          ' --
-        files: ^dynamic_type_checker/
-
   - repo: https://github.com/George-Ogden/linter/
     rev: v2.1.1
     hooks:
@@ -91,6 +70,8 @@ repos:
           .pre-commit-config.yaml|
           .gitignore
           )$
+      - id: absolute-imports-check
+        args: [--disallowed-module, dynamic_type_checker]
       - id: mypy
         args: [-r, requirements-dev.txt, --show-traceback]
       - id: spell-check-commit-msgs
