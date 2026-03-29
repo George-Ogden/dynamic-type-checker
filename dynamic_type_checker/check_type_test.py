@@ -71,7 +71,9 @@ from .utils import TypeAnnotation
             CustomMetaclassIsInstance,
             CustomMetaclassIsInstance(),
             False,
-            marks=pytest.mark.xfail,  # see https://github.com/python/cpython/issues/144873
+            marks=pytest.mark.xfail(
+                strict=False
+            ),  # see https://github.com/python/cpython/issues/144873
         ),
         (CustomMetaclassIsInstance, CustomMetaclassSubclassIsInstance(), False),
         (CustomMetaclassSubclassIsInstance, 2, True),

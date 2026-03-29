@@ -1,7 +1,7 @@
 # ruff: noqa: UP040
 # mypy: disable-error-code="misc,valid-type"
 import enum
-from typing import Any, Literal, TypeAlias, TypeAliasType
+from typing import Any, Literal, NoReturn, TypeAlias, TypeAliasType
 
 
 class EmptyClass: ...
@@ -42,6 +42,39 @@ Rotations = enum.Flag("Rotations", ["ROT90", "ROT180"])
 
 def a_function(a: int) -> int:
     return a
+
+
+def no_argument_function() -> None: ...
+
+
+def positional_only_arg_fn(x: int, /) -> int:
+    return x + 1
+
+
+def positional_keyword_arg_fn(x: int, y: int) -> int:
+    return x**y
+
+
+def keyword_arg_fn(*, seq: tuple, idx: int) -> float:
+    return seq[idx]
+
+
+def type_error_function() -> NoReturn:
+    raise TypeError()
+
+
+def variadic_arg_function(*args: bool) -> tuple[bool, ...]:
+    return args
+
+
+def variadic_kwarg_function(**kwargs: str) -> dict[str, str]:
+    return kwargs
+
+
+def fully_mixed_function(
+    pos_one: str, pos_two: str, /, mixed: int, *args: bool, keyword: float, **kwargs: tuple
+) -> tuple:
+    return pos_one, pos_two, mixed, *args, keyword, *kwargs.values()
 
 
 class CallableClass:
